@@ -33,24 +33,33 @@ void setup() {
 void loop() {
 
   newVal = readx();
-
+  Serial.println(newVal);
+  
   if(newVal > maxVal) {
     maxVal = newVal;
+        Serial.println("New MAX detected");
   }
   if(newVal < minVal) {
     minVal = newVal;
+            Serial.println("New MIN detected");
   }  
   if(newVal >= (maxVal - 100)) {
     newRising = 1;
+    Serial.println("Rising!");
   }
   else if(newVal <= (minVal + 100)) {
     newRising = 0;
+    Serial.println("Falling!");
   } 
   
-  if((oldRising == 0) && (newRising == 1)) {
+  while((oldRising == 0) && (newRising == 1)) {
+      Serial.println("Rising triggered from fall");
     revs ++;
-    oldRising = newRising;
+      Serial.print("revs: ");
+        Serial.print(revs);
+      oldRising = newRising;
   }
+
 
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
@@ -58,8 +67,8 @@ void loop() {
     waterUse = (revs * revTick);
  }
   
-  print_values();
-  delay(5);
+ // print_values();
+  delay(500);
 }
 
 
@@ -98,7 +107,7 @@ void print_values(void)
   lcd.print("z=");   
   Serial.println(readz()); 
   lcd.print(readz());   
-  lcd.setCursor(8,1);
+  lcd.setCursor(10,1);
   lcd.print(revs); 
 }
 
