@@ -14,14 +14,13 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
   int newRising = 0; //newVal rising? true or false?
   int oldRising = 0; //previous rising state
   int revs = 0; //revolutions of water meter totalled for interval time
- long previousMillis = 0;
- long interval = 60000; //Send data via xbee every 60 Seconds
+  long previousMillis = 0;
+  long interval = 60000; //Send data via xbee every 60 Seconds
   int revTick = 0.25; //For converting revolutions(revs) of meter to millilitres. You have to figure this out
   int waterUse = 0;
   
   
 void setup() {
-  // declare the ledPin as an OUTPUT:
 
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial for output
@@ -31,7 +30,7 @@ void setup() {
 }
 
 void loop() {
-
+  prevVal = newVal;
   newVal = readx();
   Serial.println(newVal);
   
@@ -43,6 +42,16 @@ void loop() {
     minVal = newVal;
             Serial.println("New MIN detected");
   }  
+ 
+   if(newVal > prevVal) {
+    newRising = 1;
+    Serial.println("Rising!");
+  }
+  elseif(newVal < prevVal) {
+    newRising = 0;
+    Serial.println("Falling!");
+  } 
+ /* //compares to min/max values. Not really working.
   if(newVal >= (maxVal - 100)) {
     newRising = 1;
     Serial.println("Rising!");
@@ -51,6 +60,7 @@ void loop() {
     newRising = 0;
     Serial.println("Falling!");
   } 
+  */
   
   while((oldRising == 0) && (newRising == 1)) {
       Serial.println("Rising triggered from fall");
@@ -65,6 +75,7 @@ void loop() {
   if(currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;  
     waterUse = (revs * revTick);
+    revs = 0;
  }
   
  // print_values();
