@@ -16,9 +16,11 @@ int oldRising = 0; //previous rising state
 int revs = 0; //revolutions of water meter totalled for interval time
 long previousMillis = 0;
 long interval = 60000; //Send data via xbee every 60 Seconds
-int revTick = 0.25; //For converting revolutions(revs) of meter to millilitres. You have to figure this out
-int waterUse = 0;
-
+float revTick = 59.5; //For converting revolutions(revs) of meter to millilitres. You have to figure this out
+float waterUse = 0;
+int test = 0; 
+int test2 = 0;
+int upTime = 0; //In minutes
 
 void setup() {
 
@@ -31,38 +33,54 @@ void setup() {
 
 void loop() {
   prevVal = newVal;
-  newVal = readx();
-  newVal = constrain(newVal, 0, 1000);
-  Serial.println(newVal);
+  newVal = readz();
+  newVal = constrain(newVal, 100, 900);
+ // Serial.println(newVal);
 
-  if((newVal > prevVal) && (newVal == 1000)){
+  if((newVal > prevVal) && (newVal == 900)){
     newRising = 1;
-    Serial.println("Rising!");
+//    Serial.println("Rising!");
   }
 
   else if(newVal < prevVal) {
     newRising = 0;
-    Serial.println("Falling!");
+ //   Serial.println("Falling!");
   }
 
-
   if((oldRising == 0) && (newRising == 1)) {
-    Serial.println("Rising triggered from fall");
+  //  Serial.println("Rising triggered from fall");
     revs ++;
-    Serial.print("****** revs: ");
-    Serial.println(revs);
+  //  Serial.print("****** revs: ");
+  //  Serial.println(revs);
   }
   oldRising = newRising;
 
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;  
-    waterUse = (revs * revTick);
+    waterUse = waterUse + (revs * revTick);
     revs = 0;
+    upTime ++;
   }
-
-  print_values();
-  delay(50);
+  lcd.clear();
+  lcd.setCursor(0,1);
+//  Serial.print("z=");  
+  lcd.print("z=");   
+  test = (readx());
+  test2 = (ready());
+//  Serial.println(readz()); 
+  lcd.print(readz());   
+  lcd.setCursor(9,1);
+  lcd.print(revs); 
+  lcd.setCursor(0,0);
+    lcd.print("WaterUse:");   
+      lcd.print(waterUse/1000);  
+      lcd.print("L"); 
+       lcd.setCursor(12,1);
+           lcd.print("T:");
+            lcd.print(upTime);  
+  //print_values();
+  delay(15);
 }
 
 
@@ -84,25 +102,30 @@ void config(void)
 void print_values(void)
 {
   lcd.clear();
-  Serial.print("x=");
-  lcd.setCursor(0,0);
-  lcd.print("x="); 
-  Serial.print(readx()); 
-  lcd.print(readx()); 
-  Serial.print(",");  
-  lcd.setCursor(8,0);
-  Serial.print("y=");   
-  lcd.print("y=");  
-  Serial.print(ready());
-  lcd.print(ready()); 
-  Serial.print(",");  
+ // Serial.print("x=");
+ // lcd.setCursor(0,0);
+//  lcd.print("x="); 
+ // Serial.print(readx()); 
+//  lcd.print(readx()); 
+ // Serial.print(",");  
+//  lcd.setCursor(8,0);
+ // Serial.print("y=");   
+//  lcd.print("y=");  
+ // Serial.print(ready());
+//  lcd.print(ready()); 
+ // Serial.print(",");  
+ /*
   lcd.setCursor(0,1);
   Serial.print("z=");  
   lcd.print("z=");   
   Serial.println(readz()); 
-  lcd.print(readz());   
+  lcd.print(prevVal);   
   lcd.setCursor(10,1);
   lcd.print(revs); 
+  lcd.setCursor(0,0);
+    lcd.print("WaterUse:");   
+      lcd.print(waterUse);   
+      */
 }
 
 int readx(void)
