@@ -9,6 +9,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 int newVal = 0; //New Reading from MAX3110
 int prevVal = 0; //Previous Reading from MAX3110
+int avgVal = 0;
 int maxVal = 0; //minumum magnetic field measured
 int minVal = 0; //minumum magnetic field measured
 int newRising = 0; //newVal rising? true or false?
@@ -33,25 +34,37 @@ void setup() {
 
 void loop() {
   prevVal = newVal;
-  newVal = readz();
-  newVal = constrain(newVal, 100, 900);
- // Serial.println(newVal);
 
-  if((newVal > prevVal) && (newVal == 900)){
+  for(int i = 0; i < 10; i++) {
+    newVal = readz();
+    //      Serial.println(newVal);
+    avgVal = newVal + avgVal;
+    // Serial.print("avg total:");
+    //  Serial.println(avgVal);
+  }
+  newVal = avgVal / 10;
+  //   Serial.print("avg:");
+  // Serial.println(newVal);
+  avgVal = 0;
+
+  newVal = constrain(newVal, 650, 1000);
+  // Serial.println(newVal);
+
+  if((newVal > prevVal) && (newVal == 1000)){
     newRising = 1;
-//    Serial.println("Rising!");
+    //    Serial.println("Rising!");
   }
 
-  else if(newVal < prevVal) {
+  else if((newVal < prevVal) && (newVal == 650)){
     newRising = 0;
- //   Serial.println("Falling!");
+    //   Serial.println("Falling!");
   }
 
   if((oldRising == 0) && (newRising == 1)) {
-  //  Serial.println("Rising triggered from fall");
+    //  Serial.println("Rising triggered from fall");
     revs ++;
-  //  Serial.print("****** revs: ");
-  //  Serial.println(revs);
+    //  Serial.print("****** revs: ");
+    //  Serial.println(revs);
   }
   oldRising = newRising;
 
@@ -64,21 +77,21 @@ void loop() {
   }
   lcd.clear();
   lcd.setCursor(0,1);
-//  Serial.print("z=");  
+  //  Serial.print("z=");  
   lcd.print("z=");   
   test = (readx());
   test2 = (ready());
-//  Serial.println(readz()); 
+  //  Serial.println(readz()); 
   lcd.print(readz());   
   lcd.setCursor(9,1);
   lcd.print(revs); 
   lcd.setCursor(0,0);
-    lcd.print("WaterUse:");   
-      lcd.print(waterUse/1000);  
-      lcd.print("L"); 
-       lcd.setCursor(12,1);
-           lcd.print("T:");
-            lcd.print(upTime);  
+  lcd.print("WaterUse:");   
+  lcd.print(waterUse/1000);  
+  lcd.print("L"); 
+  lcd.setCursor(12,1);
+  lcd.print("T:");
+  lcd.print(upTime);  
   //print_values();
   delay(15);
 }
@@ -102,30 +115,30 @@ void config(void)
 void print_values(void)
 {
   lcd.clear();
- // Serial.print("x=");
- // lcd.setCursor(0,0);
-//  lcd.print("x="); 
- // Serial.print(readx()); 
-//  lcd.print(readx()); 
- // Serial.print(",");  
-//  lcd.setCursor(8,0);
- // Serial.print("y=");   
-//  lcd.print("y=");  
- // Serial.print(ready());
-//  lcd.print(ready()); 
- // Serial.print(",");  
- /*
+  // Serial.print("x=");
+  // lcd.setCursor(0,0);
+  //  lcd.print("x="); 
+  // Serial.print(readx()); 
+  //  lcd.print(readx()); 
+  // Serial.print(",");  
+  //  lcd.setCursor(8,0);
+  // Serial.print("y=");   
+  //  lcd.print("y=");  
+  // Serial.print(ready());
+  //  lcd.print(ready()); 
+  // Serial.print(",");  
+  /*
   lcd.setCursor(0,1);
-  Serial.print("z=");  
-  lcd.print("z=");   
-  Serial.println(readz()); 
-  lcd.print(prevVal);   
-  lcd.setCursor(10,1);
-  lcd.print(revs); 
-  lcd.setCursor(0,0);
-    lcd.print("WaterUse:");   
-      lcd.print(waterUse);   
-      */
+   Serial.print("z=");  
+   lcd.print("z=");   
+   Serial.println(readz()); 
+   lcd.print(prevVal);   
+   lcd.setCursor(10,1);
+   lcd.print(revs); 
+   lcd.setCursor(0,0);
+   lcd.print("WaterUse:");   
+   lcd.print(waterUse);   
+   */
 }
 
 int readx(void)
@@ -229,4 +242,5 @@ int readz(void)
   int zout = (zl|(zh << 8)); //concatenate the MSB and LSB
   return zout;
 }
+
 
