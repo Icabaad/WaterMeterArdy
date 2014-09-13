@@ -87,13 +87,15 @@ void loop() {
     revs = 0;
     upTime ++;
       char Buffer2[80];
-      dtostrf(waterUse, 4, 2, Buffer);//
+        char buffer[20];
+   //      Serial.println(waterUse);
+      dtostrf((waterUse / 1000), 5, 2, Buffer);//
 strcpy(Buffer2, Buffer);
-    Serial.println(Buffer2);
+// Serial.println(Buffer2);
 Serial.println(Buffer);
 
   ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
-  xbee.send(zbtx);
+ xbee.send(zbtx);
 
   }
   lcd.clear();
