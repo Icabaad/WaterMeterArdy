@@ -1,11 +1,20 @@
 /*
  
  */
+
+#include <XBee.h>
 #include <LiquidCrystal.h>
 #include <Wire.h>
 #define MAG_ADDR  0x0E //7-bit address for the MAG3110, doesn't change
+
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+//XBEE
+XBee xbee = XBee();
+// This is the XBee broadcast address.  You can use the address
+// of any device you have also.
+XBeeAddress64 Broadcast = XBeeAddress64(0x00000000, 0x0000ffff);
+char Buffer[128];  // this needs to be longer than your longest packet.
 
 int newVal = 0; //New Reading from MAX3110
 int prevVal = 0; //Previous Reading from MAX3110
@@ -27,6 +36,7 @@ void setup() {
 
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial for output
+
   config();            // turn the MAG3110 on
   lcd.begin(16, 2);
   lcd.clear();
@@ -76,6 +86,15 @@ void loop() {
     waterUse = waterUse + (revs * revTick);
     revs = 0;
     upTime ++;
+      char Buffer2[80];
+      dtostrf(waterUse, 4, 2, Buffer);//
+strcpy(Buffer2, Buffer);
+    Serial.println(Buffer2);
+Serial.println(Buffer);
+
+  ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
+  xbee.send(zbtx);
+
   }
   lcd.clear();
   lcd.setCursor(0,1);
@@ -95,6 +114,9 @@ void loop() {
   lcd.print("T:");
   lcd.print(upTime);  
   //print_values();
+  
+  
+  
   delay(15);
 }
 
