@@ -34,20 +34,22 @@ void setup() {
 
 void loop() {
   prevVal = newVal;
-
+  newVal = readz();
+  /*
   for(int i = 0; i < 10; i++) {
-    newVal = readz();
-    //      Serial.println(newVal);
-    avgVal = newVal + avgVal;
-    // Serial.print("avg total:");
-    //  Serial.println(avgVal);
-  }
-  newVal = avgVal / 10;
-  //   Serial.print("avg:");
-  // Serial.println(newVal);
-  avgVal = 0;
+   newVal = readz();
+   //      Serial.println(newVal);
+   avgVal = newVal + avgVal;
+   // Serial.print("avg total:");
+   //  Serial.println(avgVal);
+   }
+   newVal = avgVal / 10;
+   //   Serial.print("avg:");
+   // Serial.println(newVal);
+   avgVal = 0;
+   */
 
-  newVal = constrain(newVal, 650, 1000);
+  newVal = constrain(newVal, 800, 1000);
   // Serial.println(newVal);
 
   if((newVal > prevVal) && (newVal == 1000)){
@@ -55,7 +57,7 @@ void loop() {
     //    Serial.println("Rising!");
   }
 
-  else if((newVal < prevVal) && (newVal == 650)){
+  else if((newVal < prevVal) && (newVal == 800)){
     newRising = 0;
     //   Serial.println("Falling!");
   }
@@ -242,5 +244,6 @@ int readz(void)
   int zout = (zl|(zh << 8)); //concatenate the MSB and LSB
   return zout;
 }
+
 
 
