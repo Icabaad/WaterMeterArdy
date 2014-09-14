@@ -26,8 +26,9 @@ int oldRising = 0; //previous rising state
 int revs = 0; //revolutions of water meter totalled for interval time
 long previousMillis = 0;
 long interval = 60000; //Send data via xbee every 60 Seconds
-float revTick = 59.5; //For converting revolutions(revs) of meter to millilitres. You have to figure this out
-float waterUse = 0;
+float revTick = 57.1428; //For converting revolutions(revs) of meter to millilitres. You have to figure this out
+float waterUseTotal = 0;
+float waterUseMinute = 0;
 int test = 0; 
 int test2 = 0;
 int upTime = 0; //In minutes
@@ -45,59 +46,40 @@ void setup() {
 void loop() {
   prevVal = newVal;
   newVal = readz();
-  /*
-  for(int i = 0; i < 10; i++) {
-   newVal = readz();
-   //      Serial.println(newVal);
-   avgVal = newVal + avgVal;
-   // Serial.print("avg total:");
-   //  Serial.println(avgVal);
-   }
-   newVal = avgVal / 10;
-   //   Serial.print("avg:");
-   // Serial.println(newVal);
-   avgVal = 0;
-   */
 
   newVal = constrain(newVal, 800, 1000);
-  // Serial.println(newVal);
 
   if((newVal > prevVal) && (newVal == 1000)){
     newRising = 1;
-    //    Serial.println("Rising!");
   }
 
   else if((newVal < prevVal) && (newVal == 800)){
     newRising = 0;
-    //   Serial.println("Falling!");
   }
 
   if((oldRising == 0) && (newRising == 1)) {
-    //  Serial.println("Rising triggered from fall");
     revs ++;
-    //  Serial.print("****** revs: ");
-    //  Serial.println(revs);
   }
+
   oldRising = newRising;
 
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
+    waterUseMinute = 0;
     previousMillis = currentMillis;  
-    waterUse = waterUse + (revs * revTick);
+    waterUseMinute = waterUseMinute + (revs * revTick);
+    waterUseTotal = waterUseTotal + waterUseMinute;
     revs = 0;
     upTime ++;
-      char Buffer2[80];
-        char buffer[20];
-   //      Serial.println(waterUse);
-      dtostrf((waterUse / 1000), 5, 2, Buffer);//
-strcpy(Buffer2, Buffer);
-// Serial.println(Buffer2);
-Serial.println(Buffer);
-
-  ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
- xbee.send(zbtx);
-
+    char Buffer2[20];
+    char buffer[20];
+    dtostrf((waterUseMinute / 1000), 5, 2, Buffer);//
+    strcpy(Buffer2, Buffer);
+    ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
+    xbee.send(zbtx);
+    
   }
+  
   lcd.clear();
   lcd.setCursor(0,1);
   //  Serial.print("z=");  
@@ -109,16 +91,19 @@ Serial.println(Buffer);
   lcd.setCursor(9,1);
   lcd.print(revs); 
   lcd.setCursor(0,0);
-  lcd.print("WaterUse:");   
-  lcd.print(waterUse/1000);  
-  lcd.print("L"); 
+// lcd.print("");   
+  lcd.print(waterUseMinute/1000);  
+  lcd.print("L/m "); 
+ //  lcd.print("Tot:");   
+  lcd.print(waterUseTotal/1000);  
+  lcd.print("L/t"); 
   lcd.setCursor(12,1);
   lcd.print("T:");
   lcd.print(upTime);  
   //print_values();
-  
-  
-  
+
+
+
   delay(15);
 }
 
@@ -268,6 +253,7 @@ int readz(void)
   int zout = (zl|(zh << 8)); //concatenate the MSB and LSB
   return zout;
 }
+
 
 
 
