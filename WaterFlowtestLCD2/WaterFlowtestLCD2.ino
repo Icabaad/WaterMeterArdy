@@ -79,7 +79,7 @@ void loop() {
     xbee.send(zbtx);
     
   }
-  
+ 
   lcd.clear();
   lcd.setCursor(0,1);
   //  Serial.print("z=");  
@@ -125,7 +125,7 @@ void config(void)
 
 void print_values(void)
 {
-  lcd.clear();
+  //lcd.clear();
   // Serial.print("x=");
   // lcd.setCursor(0,0);
   //  lcd.print("x="); 
