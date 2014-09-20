@@ -41,6 +41,9 @@ void setup() {
   config();            // turn the MAG3110 on
   lcd.begin(16, 2);
   lcd.clear();
+  
+  pinMode(7, OUTPUT);
+  digitalWrite(7, LOW);
 }
 
 void loop() {
@@ -65,6 +68,7 @@ void loop() {
 
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
+      digitalWrite(7, LOW);
     waterUseMinute = 0;
     previousMillis = currentMillis;  
     waterUseMinute = waterUseMinute + (revs * revTick);
@@ -77,6 +81,8 @@ void loop() {
     strcpy(Buffer2, Buffer);
     ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
     xbee.send(zbtx);
+    delay(5);
+      digitalWrite(7, HIGH);
     
   }
  
