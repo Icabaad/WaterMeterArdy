@@ -81,7 +81,7 @@ void loop() {
     strcpy(Buffer2, Buffer);
     ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
     xbee.send(zbtx);
-    delay(5);
+  
       digitalWrite(7, HIGH);
     
   }
