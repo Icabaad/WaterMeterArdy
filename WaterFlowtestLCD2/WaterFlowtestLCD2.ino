@@ -3,11 +3,11 @@
  */
 
 #include <XBee.h>
-#include <LiquidCrystal.h>
+//#include <LiquidCrystal.h>
 #include <Wire.h>
 #define MAG_ADDR  0x0E //7-bit address for the MAG3110, doesn't change
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 //XBEE
 XBee xbee = XBee();
@@ -32,6 +32,8 @@ float waterUseMinute = 0;
 int test = 0; 
 int test2 = 0;
 int upTime = 0; //In minutes
+int batteryVPin = A0;
+float batteryV = 0;
 
 void setup() {
 
@@ -39,8 +41,8 @@ void setup() {
   Serial.begin(9600);  // start serial for output
 
   config();            // turn the MAG3110 on
-  lcd.begin(16, 2);
-  lcd.clear();
+//  lcd.begin(16, 2);
+//  lcd.clear();
   
   pinMode(7, OUTPUT);
   digitalWrite(7, LOW);
@@ -69,6 +71,7 @@ void loop() {
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
       digitalWrite(7, LOW);
+      batteryV = analogRead(batteryVPin) * 2;
     waterUseMinute = 0;
     previousMillis = currentMillis;  
     waterUseMinute = waterUseMinute + (revs * revTick);
@@ -79,13 +82,16 @@ void loop() {
     char buffer[20];
     dtostrf((waterUseMinute / 1000), 5, 2, Buffer);//
     strcpy(Buffer2, Buffer);
+    strcat(Buffer2, ","); 
+    strcat(Buffer2, dtostrf(batteryV, 5, 2, Buffer)); 
+        
     ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
     xbee.send(zbtx);
   
       digitalWrite(7, HIGH);
     
   }
- 
+ /*
   lcd.clear();
   lcd.setCursor(0,1);
   //  Serial.print("z=");  
@@ -107,10 +113,8 @@ void loop() {
   lcd.print("T:");
   lcd.print(upTime);  
   //print_values();
-
-
-
   delay(15);
+*/
 }
 
 
