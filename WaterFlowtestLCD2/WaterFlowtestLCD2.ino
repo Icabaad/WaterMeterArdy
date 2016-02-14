@@ -1,21 +1,19 @@
 /*
-Hook up to meter.
-Turn on water tap until it Runs
-Turn on Arduino Water Meter
- */
+  Hook up to meter.
+  Turn on water tap until it Runs
+  Turn on Arduino Water Meter
+*/
 
 #include <XBee.h>
-#include <LiquidCrystal.h>
 #include <Wire.h>
 #define MAG_ADDR  0x0E //7-bit address for the MAG3110, doesn't change
 
-//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 //XBEE
 XBee xbee = XBee();
 // This is the XBee broadcast address.  You can use the address
 // of any device you have also.
 XBeeAddress64 Broadcast = XBeeAddress64(0x00000000, 0x0000ffff);
+
 char Buffer[128];  // this needs to be longer than your longest packet.
 
 int newVal = 0; //New Reading from MAX3110
@@ -36,46 +34,54 @@ int test2 = 0;
 int upTime = 0; //In minutes
 int batteryVPin = A0;
 float batteryV = 0;
-int ledPin = 3;
+int ledPin = 9;
 int ledValue = 0;
 int calcVal = 0;
 int valVal = 0;
+
 void setup() {
 
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial for output
-
   config();            // turn the MAG3110 on
-  lcd.begin(16, 2);
-  lcd.clear();
+  pinMode(13, OUTPUT);
+  pinMode(9, OUTPUT);
+  digitalWrite(9, HIGH);
+  digitalWrite(13, LOW);
+  delay(1000);
+  digitalWrite(13, HIGH);
+  digitalWrite(9, LOW);
+  delay(1000);
+  digitalWrite(13, LOW);
+  digitalWrite(9, HIGH);
+  delay(1000);
+  digitalWrite(9, LOW);
 
-  pinMode(7, OUTPUT);
-  digitalWrite(7, LOW);
 
 
 }
 void loop() {
-//  delay(1000);
+  //  delay(1000);
   prevVal = newVal;
   newVal = readz();
-/*
-  if (revs <= 10) {
-    delay(500);
-    minVal = min(minVal, newVal);
-    maxVal = max(maxVal, newVal);
-    if ((newVal != minVal)) {
-      Serial.print("Z: "); Serial.print(readz());Serial.print(" Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
+  /*
+    if (revs <= 10) {
+      delay(500);
+      minVal = min(minVal, newVal);
+      maxVal = max(maxVal, newVal);
+      if ((newVal != minVal)) {
+        Serial.print("Z: "); Serial.print(readz());Serial.print(" Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
+      }
+      else if ((newVal == maxVal )) {
+        revs++;
+        Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
+      }
     }
-    else if ((newVal == maxVal )) {
-      revs++;
-      Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
-    }
-  }
   */
-    // record the maximum sensor value
+  // record the maximum sensor value
   if (newVal > maxVal) {
     maxVal = newVal;
-   // Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
+    // Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
   }
 
   // record the minimum sensor value
@@ -84,25 +90,25 @@ void loop() {
     //Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
   }
   valVal = maxVal - minVal;
-  
+
   //calcVal = constrain(newVal, 0, 100);
   //calcVal = map(newVal, minVal, maxVal, 0, valVal);
-//  ledValue = map(calcVal, 0, 100, 0, 255);
+  //  ledValue = map(calcVal, 0, 100, 0, 255);
   //delay(200);
-  
-//  Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
- // Serial.print(newVal); Serial.print("-----"); Serial.println(calcVal);
 
-  if ((newVal > prevVal) && (newVal >= (maxVal-100))) {
+  //  Serial.print("Min: "); Serial.print(minVal); Serial.print(" Max: "); Serial.println(maxVal);
+  // Serial.print(newVal); Serial.print("-----"); Serial.println(calcVal);
+
+  if ((newVal > prevVal) && (newVal >= (maxVal - 100))) {
     newRising = 1;
-//    Serial.println(newRising);
-      analogWrite(ledPin, 20);
+    //    Serial.println(newRising);
+    analogWrite(ledPin, 40);
   }
 
-  else if ((newVal < prevVal) && (newVal <= (minVal+100))) {
+  else if ((newVal < prevVal) && (newVal <= (minVal + 100))) {
     newRising = 0;
-  //  Serial.println(newRising);
-      analogWrite(ledPin, 0);
+    //  Serial.println(newRising);
+    analogWrite(ledPin, 0);
   }
 
   if ((oldRising == 0) && (newRising == 1)) {
@@ -114,7 +120,7 @@ void loop() {
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
-    digitalWrite(7, LOW);
+    digitalWrite(9, LOW);
     batteryV = analogRead(batteryVPin) * 2;
     waterUseMinute = 0;
     previousMillis = currentMillis;
@@ -132,44 +138,16 @@ void loop() {
     ZBTxRequest zbtx = ZBTxRequest(Broadcast, (uint8_t *)Buffer2, strlen(Buffer2));
     xbee.send(zbtx);
 
-//    digitalWrite(7, HIGH);
+    //    digitalWrite(9, HIGH);
 
   }
   test = (readx());
   test2 = (ready());
-    delay(15);
-  
-  lcd.clear();
-  lcd.setCursor(0, 1);
-
-  lcd.print("z=");
-
-
-  lcd.print(newVal);
-  lcd.setCursor(9, 1);
-  lcd.print(revs);
-  lcd.setCursor(0, 0);
-  lcd.print("");
-  lcd.print(waterUseMinute / 1000);
-  lcd.print("L/m ");
-  lcd.print("Tot:");
-  lcd.print(waterUseTotal / 1000);
-  lcd.print("L/t");
-  lcd.setCursor(12, 1);
-  lcd.print("T:");
-  lcd.print(upTime);
-  //print_values();
-  
-
-
-
-  //  Serial.print("z="); Serial.println(readz());
-  //  Serial.print(revs); Serial.print("---"); Serial.println(upTime);
-  //  Serial.println(waterUseMinute);
-  //  delay(10);
-
 
 }
+
+
+
 
 
 void config(void)
@@ -185,37 +163,6 @@ void config(void)
   Wire.write(0x10);              // cntrl register1
   Wire.write(1);                 // send 0x01, active mode
   Wire.endTransmission();       // stop transmitting
-}
-
-void print_values(void)
-{
-  //lcd.clear();
-  Serial.print("x=");
-  // lcd.setCursor(0,0);
-  //  lcd.print("x=");
-  Serial.print(readx());
-  //  lcd.print(readx());
-  Serial.print(",");
-  //  lcd.setCursor(8,0);
-  Serial.print("y=");
-  //  lcd.print("y=");
-  Serial.print(ready());
-  //  lcd.print(ready());
-  Serial.print(",");
-  Serial.print("z=");
-  Serial.println(readz());
-
-  //  lcd.setCursor(0, 1); \
-
-  //  lcd.print("z=");
-
-  //  lcd.print(prevVal);
-  //  lcd.setCursor(10, 1);
-  //  lcd.print(revs);
-  //  lcd.setCursor(0, 0);
-  //  lcd.print("WaterUse:");
-  //  lcd.print(waterUse);
-
 }
 
 int readx(void)
